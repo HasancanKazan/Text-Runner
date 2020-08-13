@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:marquee/marquee.dart';
 
 void main(List<String> args) {
@@ -9,6 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: MyAppHome(),
     );
   }
@@ -23,72 +27,120 @@ class MyAppHome extends StatefulWidget {
 
 // Sadece bu dosya içerisinde kullanabiliriz _ dediğimiz için başka dosyadan import edilemez.
 class _MyAppHomeState extends State<MyAppHome> {
+  int typeCharLength = 0;
+  int step = 0;
+  String lorem =
+      "                                      Teknik Lisede yazılım dalından 2014 yılında mezun oldum.2015 yılında Dumlupınar Üniversitesinde Bilgisayar Mühendisliği bölümünde eğitim görmeye başladım ve 2019 haziran ayı itibari ile mezun oldum.Şuan bir yazılım firmasında yazılım uzmanı olarak çalışmaktayım.Eğitim hayatım boyunca web projeleri geliştirme,masaüstü uygulamaları ve android uygulamaları geliştirmek üzerine çalışmalar yaptım ve buna şuanda devam ediyorum.Sizlere eğitim serilerimde yapmış olduğum hataları minumuma indirerek eğitim sonunda öğrendiğimiz teknolojilerle projeler yapabiliyor olma yetkinliğini kazandırabilmek istiyorum."
+          .toLowerCase()
+          .replaceAll(".", "")
+          .replaceAll(",", "");
+  double score = 0.0;
+  int lastTypeAt;
+
+  void updateLastTypeAt() {
+    this.lastTypeAt = DateTime.now().millisecondsSinceEpoch;
+  }
+
+  void onType(String value) {
+    updateLastTypeAt();
+    String trimmedValue = lorem.trimLeft();
+
+    setState(() {
+      if (trimmedValue.indexOf(value.toLowerCase()) != 0)
+        step = 2;
+      else {
+        typeCharLength = value.length;
+      }
+    });
+  }
+
+  void onStartClick() {
+    setState(() {
+      updateLastTypeAt();
+      step++;
+    });
+
+    var timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      int now = DateTime.now().millisecondsSinceEpoch;
+      //OYUN BİTTİ
+      setState(() {
+        if (now - lastTypeAt > 4000) {
+          timer.cancel();
+          step++;
+        }
+      });
+    });
+  }
+
+  void tryAgain() {
+    setState(() {
+      typeCharLength = 0;
+      step = 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    String lorem =
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    var shownWidget;
+
+    if (step == 0)
+      shownWidget = <Widget>[
+        Text("Hck ile flutter öğreniyorum"),
+        Container(
+          margin: EdgeInsets.only(top: 20),
+          child: RaisedButton(
+            onPressed: onStartClick,
+            child: Text("Başlamalısın !!"),
+          ),
+        )
+      ];
+    else if (step == 1)
+      shownWidget = <Widget>[
+        Text('$typeCharLength'),
+        Container(
+          height: 40,
+          child: Marquee(
+            text: lorem,
+            style: TextStyle(fontSize: 24, letterSpacing: 2),
+            scrollAxis: Axis.horizontal,
+            blankSpace: 20.0,
+            velocity: 100.0,
+            startPadding: 0,
+            accelerationDuration: Duration(seconds: 18),
+            accelerationCurve: Curves.ease,
+            decelerationDuration: Duration(milliseconds: 500),
+            decelerationCurve: Curves.easeOut,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 32, right: 16, left: 16),
+          child: TextField(
+            onChanged: onType,
+            autofocus: true,
+            //obscureText: true,  Bu alanı açarsak şifre şeklinde text girişi olur
+            decoration: InputDecoration(
+                labelText: "Text Input", border: OutlineInputBorder()),
+          ),
+        )
+      ];
+    else
+      shownWidget = <Widget>[
+        Text("GAME OVER MY DEAR FRIEND YOUR SCORE :$typeCharLength TRY AGAIN"),
+        RaisedButton(
+          onPressed: tryAgain,
+          child: Text("Yeniden Başla.."),
+        )
+      ];
     return Scaffold(
       appBar: AppBar(
         title: Text("Text Runner App"),
       ),
       body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(left: 100),
-            height: 40,
-            child: Marquee(
-              text: lorem,
-              style: TextStyle(fontSize: 24, letterSpacing: 2),
-              scrollAxis: Axis.horizontal,
-              blankSpace: 20.0,
-              velocity: 100.0,
-              pauseAfterRound: Duration(seconds: 10),
-              startPadding: 0,
-              accelerationDuration: Duration(seconds: 5),
-              accelerationCurve: Curves.linear,
-              decelerationDuration: Duration(milliseconds: 500),
-              decelerationCurve: Curves.easeOut,
-            ),
-            //     child: RichText(
-            //   maxLines: 1,
-            //   softWrap: false,
-            //   text: TextSpan(
-            //       style: TextStyle(
-            //         fontSize: 24,
-            //         letterSpacing: 2,
-            //         color: Colors.black,
-            //       ),
-            //       children: <TextSpan>[
-            //         TextSpan(text: "HCK"),
-            //         TextSpan(
-            //           text: lorem,
-            //           style: TextStyle(
-            //               fontSize: 24, letterSpacing: 2, color: Colors.blue),
-            //         ),
-            //       ]),
-            // )
-
-            //margin: EdgeInsets.only(left: 100),
-            // child: Text(
-            //   lorem,
-            //   maxLines: 1,
-            //   softWrap: false,
-            //   style:
-            //       TextStyle(fontSize: 24, letterSpacing: 2, color: Colors.cyan),
-            // ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 32, right: 16, left: 16),
-            child: TextField(
-              //obscureText: true,  Bu alanı açarsak şifre şeklinde text girişi olur
-              decoration: InputDecoration(
-                  labelText: "Text Input", border: OutlineInputBorder()),
-            ),
-          )
-        ],
-      )),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: shownWidget,
+        ),
+      ),
     );
   }
 }
