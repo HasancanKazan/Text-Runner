@@ -27,6 +27,7 @@ class MyAppHome extends StatefulWidget {
 
 // Sadece bu dosya içerisinde kullanabiliriz _ dediğimiz için başka dosyadan import edilemez.
 class _MyAppHomeState extends State<MyAppHome> {
+  String userName = "";
   int typeCharLength = 0;
   int step = 0;
   String lorem =
@@ -54,6 +55,13 @@ class _MyAppHomeState extends State<MyAppHome> {
     });
   }
 
+  void onUserNameType(String value) {
+    setState(() {
+      this.userName = value;
+      print(userName);
+    });
+  }
+
   void onStartClick() {
     setState(() {
       updateLastTypeAt();
@@ -64,8 +72,10 @@ class _MyAppHomeState extends State<MyAppHome> {
       int now = DateTime.now().millisecondsSinceEpoch;
       //OYUN BİTTİ
       setState(() {
-        if (now - lastTypeAt > 4000) {
+        if (step != 1) {
           timer.cancel();
+        }
+        if (step == 1 && now - lastTypeAt > 4000) {
           step++;
         }
       });
@@ -87,10 +97,21 @@ class _MyAppHomeState extends State<MyAppHome> {
       shownWidget = <Widget>[
         Text("Hck ile flutter öğreniyorum"),
         Container(
+          margin: EdgeInsets.only(left: 40, right: 40, top: 20),
+          child: TextField(
+            maxLength: 8,
+            onChanged: onUserNameType,
+            autofocus: true,
+            //obscureText: true,  Bu alanı açarsak şifre şeklinde text girişi olur
+            decoration: InputDecoration(
+                labelText: "İsminizi Yazınız", border: OutlineInputBorder()),
+          ),
+        ),
+        Container(
           margin: EdgeInsets.only(top: 20),
           child: RaisedButton(
-            onPressed: onStartClick,
-            child: Text("Başlamalısın !!"),
+            onPressed: userName.length == 0 ? null : onStartClick,
+            child: Text("Hadi Oyuna Başlayalım !"),
           ),
         )
       ];
