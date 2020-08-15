@@ -58,7 +58,7 @@ class _MyAppHomeState extends State<MyAppHome> {
   void onUserNameType(String value) {
     setState(() {
       this.userName = value;
-      print(userName);
+      //print(userName);
     });
   }
 
